@@ -58,10 +58,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late CameraController controller;
-  DateTime _start = DateTime.now();
-  double _fps = 0.0;
-  bool _started = false;
-  int _counter = 0, _width = 0, _height = 0;
   final CameraOpticFlowPainter _livePicture = CameraOpticFlowPainter();
 
   @override
@@ -74,16 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       controller.startImageStream((image) {
         setState(() {
-          if (_started) {
-            Duration elapsed = DateTime.now().difference(_start);
-            _fps = _counter / elapsed.inSeconds;
-          } else {
-            _start = DateTime.now();
-            _started = true;
-          }
-          _counter++;
-          _width = image.width;
-          _height = image.height;
           _livePicture.setImage(image).whenComplete(() {});
         });
       });
@@ -134,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Text("Grabbed: $_counter ($_width x $_height) FPS: ${_fps.toStringAsFixed(2)}"),
+                          Text("Grabbed: ${_livePicture.frameCount()} (${_livePicture.width()} x ${_livePicture.height()}) FPS: ${_livePicture.fps().toStringAsFixed(2)}"),
                           Text(shiftStr()),
                         ],
                       ),
