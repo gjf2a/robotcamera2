@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:camera/camera.dart';
@@ -60,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double _fps = 0.0;
   bool _started = false;
   int _counter = 0, _width = 0, _height = 0;
-  final CameraImagePainter _livePicture = CameraImagePainter();
+  final CameraOpticFlowPainter _livePicture = CameraOpticFlowPainter();
 
   @override
   void initState() {
@@ -142,4 +144,21 @@ class _MyHomePageState extends State<MyHomePage> {
         )
     );
   }
+}
+
+class CameraOpticFlowPainter extends CameraImagePainter {
+  Uint8List? _lastYs;
+  CorrelationFlow? _shift;
+
+  @override
+  Future<void> setImage(CameraImage img) async {
+    super.setImage(img);
+    Uint8List ys = img.planes[0].bytes;
+    if (_lastYs != null) {
+      _shift = await api.getCorrelationFlow(prevYs: _lastYs!, currentYs: ys, width: img.width, height: img.height);
+    }
+    _lastYs = ys;
+  }
+
+  CorrelationFlow? getShift() {return _shift;}
 }
